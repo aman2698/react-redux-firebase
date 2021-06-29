@@ -1,39 +1,48 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { signup } from "../actions/auth";
-import { useSelector, connect, useDispatch } from "react-redux";
+import {
+  signup,
+  signUpWithGoogleEmployee,
+  signUpWithGoogleEmployer,
+  facebookSignUpForEmployee,
+  facebookSignUpForEmployer
+} from "../actions/auth";
+import { useSelector, useDispatch } from "react-redux";
+import { Redirect, Link,withRouter } from "react-router-dom";
 
-const SignUp = (props) => {
-    const dispatch = useDispatch();
+const SignUp = ({history}) => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
-    confirmPassword: "",
+    role: "",
   });
-  const { name, email, password, confirmPassword } = formData;
-   const onChange = e =>{
-       setFormData({...formData,[e.target.name]:e.target.value})
-   }
-   const onSubmit = (e) =>{
-       e.preventDefault()
-       if(password===confirmPassword){
-        dispatch(signup(email,password))
-       }else{
-           console.log("Password not match");
-       }
-   }
+  const { name, email, role } = formData;
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    dispatch(signup(email, name, role));
+  };
+
+  const data = useSelector((store) => store.firebaseReducer);
+  // console.log(auth);
+  if (data.auth.isEmpty === false && data.profile.isEmpty === false) {
+    return <Redirect to="/" />;
+  }
   return (
     <div className="bg-grey-lighter min-h-screen flex flex-col">
       <div className="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-center px-2">
         <div className="bg-white px-6 py-8 rounded shadow-md text-black w-full">
           <h1 className="mb-8 text-3xl text-center">Sign up</h1>
-          <form onSubmit={e => onSubmit(e)}>
+          <form onSubmit={(e) => onSubmit(e)}>
             <input
               type="text"
               className="block border border-grey-light w-full p-3 rounded mb-4"
               name="name"
-              onChange={e=>onChange(e)}
+              onChange={(e) => onChange(e)}
               placeholder="Full Name"
             />
 
@@ -41,28 +50,30 @@ const SignUp = (props) => {
               type="text"
               className="block border border-grey-light w-full p-3 rounded mb-4"
               name="email"
-              onChange={e=>onChange(e)}
+              onChange={(e) => onChange(e)}
               placeholder="Email"
             />
 
-            <input
-              type="password"
+            <select
               className="block border border-grey-light w-full p-3 rounded mb-4"
-              name="password"
-              onChange={e=>onChange(e)}
-              placeholder="Password"
-            />
-            <input
-              type="password"
-              className="block border border-grey-light w-full p-3 rounded mb-4"
-              name="confirmPassword"
-              onChange={e=>onChange(e)}
-              placeholder="Confirm Password"
-            />
+              name="role"
+              id="role"
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  role: document.getElementById("role").value,
+                })
+              }
+            >
+              <option value="EMPLOYER">Employer</option>
+              <option value="EMPLOYEE">Employee</option>
+            </select>
 
             <button
               type="submit"
-              className="w-full text-center py-3 rounded bg-green text-white hover:bg-green-dark focus:outline-none my-1"
+              className="w-full py-3 mt-10 bg-gray-800 rounded-sm
+              font-medium text-white uppercase
+              focus:outline-none hover:bg-gray-700 hover:shadow-none"
             >
               Create Account
             </button>
@@ -87,13 +98,36 @@ const SignUp = (props) => {
 
         <div className="text-grey-dark mt-6">
           Already have an account?
-          <a
+          <Link
+            to="login"
             className="no-underline border-b border-blue text-blue"
-            href="../login/"
           >
             Log in
-          </a>
-          .
+          </Link>
+          <button
+            className="bg-red-500 hover:bg-red-600 w-1/2 py-2 text-white "
+            onClick={(e) => dispatch(signUpWithGoogleEmployer(history))}
+          >
+            Sign In with Google for Employer
+          </button>
+          <button
+            className="bg-red-500 hover:bg-red-600 w-1/2 py-2 text-white"
+            onClick={(e) => dispatch(signUpWithGoogleEmployee(history))}
+          >
+            Sign In with Google for Employee
+          </button>
+          <button
+            className="bg-blue-500 hover:bg-blue-600 w-1/2 py-2 text-white "
+            onClick={(e) => dispatch(facebookSignUpForEmployer(history))}
+          >
+            Sign In with facebook for Employer
+          </button>
+          <button
+            className="bg-blue-500 hover:bg-blue-600 w-1/2 py-2 text-white"
+            onClick={(e) => dispatch(facebookSignUpForEmployee(history))}
+          >
+            Sign In with facebook for Employee
+          </button>
         </div>
       </div>
     </div>
@@ -102,4 +136,4 @@ const SignUp = (props) => {
 
 SignUp.propTypes = {};
 
-export default SignUp;
+export default withRouter(SignUp);

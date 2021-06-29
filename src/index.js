@@ -16,6 +16,7 @@ import { composeWithDevTools } from "redux-devtools-extension";
 // ENHANCING STORE WITH FIREBASE
 import { ReactReduxFirebaseProvider, getFirebase } from 'react-redux-firebase'
 import firebase from "./firebase";
+import { createFirestoreInstance } from 'redux-firestore'
 
 const middleware = [thunk.withExtraArgument(getFirebase)];
 
@@ -28,12 +29,15 @@ const store = createStore(
 const fbConfig={
  
 }
-const rrfConfig = { userProfile: 'users' } 
+const rrfConfig = { userProfile: 'users' ,useFirestoreForProfile: true} 
 firebase.initializeApp(fbConfig)
+firebase.firestore() 
+ firebase.storage();
 const rrfProps = {
    firebase,
     config: rrfConfig,
-    dispatch: store.dispatch
+    dispatch: store.dispatch,
+    createFirestoreInstance
   }
 
 ReactDOM.render(
